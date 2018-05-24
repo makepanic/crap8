@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>crap-8</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <link rel="stylesheet" href="vendor/spectre.min.css">
+  <link rel="stylesheet" href="./index.css">
+  <script src="vendor/require.js"></script>
+  <style>
+    body {
+      padding-top: 40px;
+    }
+
+    .display {
+      background: #000;
+      width: 100%;
+      image-rendering: pixelated;
+    }
+
+    #keymap > div {
+      display: flex;
+    }
+
+    #keymap .btn {
+      flex: 1;
+      height: 70px;
+      margin: 5px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="layout">
+  <div class="columns">
+    <div class="column col-6 col-sm-12">
+      <div class="card screen__wrapper">
+        <div class="card-image">
+          <canvas class="display" id="screen" width="64" height="32"></canvas>
+        </div>
+        <div class="card-header">
+          <div class="card-title h5">crap8</div>
+          <div class="card-subtitle text-gray">A crappy <a href="https://en.wikipedia.org/wiki/CHIP-8">CHIP-8</a>
+            emulator
+          </div>
+        </div>
+        <div class="card-body">
+          <div class="form-horizontal">
+            <div class="form-group">
+              <div class="col-3 col-sm-12">
+                <label for="roms">Switch rom</label>
+              </div>
+              <div class="col-9 col-sm-12">
+                <select class="form-select" name="roms" id="roms">
+                  <option value="15PUZZLE">15PUZZLE</option>
+                  <option value="BLINKY">BLINKY</option>
+                  <option value="BLITZ">BLITZ</option>
+                  <option value="BRIX">BRIX</option>
+                  <option value="CONNECT4">CONNECT4</option>
+                  <option value="GUESS">GUESS</option>
+                  <option value="HIDDEN">HIDDEN</option>
+                  <option value="INVADERS" selected>INVADERS</option>
+                  <option value="KALEID">KALEID</option>
+                  <option value="MAZE">MAZE</option>
+                  <option value="MERLIN">MERLIN</option>
+                  <option value="MISSILE">MISSILE</option>
+                  <option value="PONG">PONG</option>
+                  <option value="PONG2">PONG2</option>
+                  <option value="PUZZLE">PUZZLE</option>
+                  <option value="SYZYGY">SYZYGY</option>
+                  <option value="TANK">TANK</option>
+                  <option value="TETRIS">TETRIS</option>
+                  <option value="TICTAC">TICTAC</option>
+                  <option value="UFO">UFO</option>
+                  <option value="VBRIX">VBRIX</option>
+                  <option value="VERS">VERS</option>
+                  <option value="WIPEOFF">WIPEOFF</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+        </div>
+        <div class="card-footer">
+          This is a unoptimized experiment of implementing a
+          <a href="https://en.wikipedia.org/wiki/CHIP-8">CHIP-8</a> emulator in JavaScript. <br>
+          Most of the implementation is based on the great information provided by <a href="http://devernay.free.fr/hacks/chip8/C8TECH10.HTM">Cowgod's Chip-8 Technical Reference v1.0</a>. <br>
+          Check out the source <a href="https://github.com/makepanic/crap8">on GitHub</a>.
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title h5">Input</div>
+          <div class="card-subtitle text-gray">Input mappings</div>
+        </div>
+        <div class="card-body">
+          <div id="keymap">
+            <div>
+              <button class="btn" type="button" data-c="1">1</button>
+              <button class="btn" type="button" data-c="2">2</button>
+              <button class="btn" type="button" data-c="3">3</button>
+              <button class="btn" type="button" data-c="C">4</button>
+            </div>
+            <div>
+              <button class="btn" type="button" data-c="4">q</button>
+              <button class="btn" type="button" data-c="5">w</button>
+              <button class="btn" type="button" data-c="6">e</button>
+              <button class="btn" type="button" data-c="D">r</button>
+            </div>
+            <div>
+              <button class="btn" type="button" data-c="7">a</button>
+              <button class="btn" type="button" data-c="8">s</button>
+              <button class="btn" type="button" data-c="9">d</button>
+              <button class="btn" type="button" data-c="E">f</button>
+            </div>
+            <div>
+              <button class="btn" type="button" data-c="A">z</button>
+              <button class="btn" type="button" data-c="0">x</button>
+              <button class="btn" type="button" data-c="B">c</button>
+              <button class="btn" type="button" data-c="F">v</button>
+            </div>
+          </div>
+        </div>
+        <div class="card-footer">
+          The CHIP-8 has 16 keys to provide input to a program. <br>
+          The default layout is mapped to your keyboard as seen above.
+        </div>
+      </div>
+    </div>
+
+    <div class="column col-6 col-sm-12">
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title h5">Registers</div>
+          <div class="card-subtitle text-gray">Current emulator register values</div>
+        </div>
+        <div class="card-body">
+          <pre class="code"><code id="data" class="internal"></code></pre>
+        </div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="card">
+        <div class="card-header">
+          <div class="card-title h5">Memory</div>
+          <div class="card-subtitle text-gray">Current emulator memory including the selected ROM</div>
+        </div>
+        <div class="card-body">
+          <pre class="code"><code id="memory" class="internal"></code></pre>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script src="./crap-8.js"></script>
+<script>require(['index']);</script>
+</body>
+</html>

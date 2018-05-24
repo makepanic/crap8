@@ -1,0 +1,25 @@
+{
+  "include": [
+    "src/**/*.ts",
+    "index.ts"
+  ],
+  "sourceMap": true,
+  "compilerOptions": {
+    "outFile": "crap-8.js",
+    "pretty": true,
+    "sourceMap": true,
+    "declaration": false,
+    "noImplicitAny": true,
+    "module": "amd",
+    "target": "es2017",
+    "lib": [
+      "DOM",
+      "es2016",
+      "es5",
+      "es2015.core",
+      "es2015.collection",
+      "es2016.array.include",
+      "es2017"
+    ]
+  }
+}
