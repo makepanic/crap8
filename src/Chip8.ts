@@ -13,7 +13,7 @@ export default class Chip8 {
   private didDraw = false;
   private didDumpMemory = false;
 
-  private tickrate = 0;
+  private tickrate = 1000 / 1000;
   private timerTickrate = 1000 / 60;
   private resolveWaitingForKey: any;
 
@@ -80,11 +80,17 @@ export default class Chip8 {
 
   async run() {
     this.running = true;
+    let lastRun  = Date.now();
 
     while (this.running) {
-      for (let i = 0; i < 10; i++) {
+      // try to calculate amount of cycles we need for 500hz
+      const cyclesToRun = ((Date.now() - lastRun) / 1000) * 500;
+
+      for (let i = 0; i < cyclesToRun; i++) {
         await this.step();
       }
+
+      lastRun = Date.now();
       await timeout(this.tickrate);
     }
   }
@@ -205,6 +211,14 @@ export default class Chip8 {
             this.V[0xF] = this.V[op.x] & 0x1;
 
             this.V[op.x] >>= 1;
+            this.V[op.x] &= 0xFF;
+            break;
+          }
+
+          case 0x0007: {
+            this.V[0xF] = +(this.V[op.y] > this.V[op.x]);
+
+            this.V[op.x] = this.V[op.y] - this.V[op.x];
             this.V[op.x] &= 0xFF;
             break;
           }
@@ -371,7 +385,6 @@ export default class Chip8 {
   }
 
   keyDown(keyIdx: number) {
-    console.log('down', keyIdx);
     this.KEYS[keyIdx] = 1;
     if (this.resolveWaitingForKey) {
       this.resolveWaitingForKey(keyIdx);
@@ -380,7 +393,6 @@ export default class Chip8 {
   }
 
   keyUp(keyIdx: number) {
-    console.log('up', keyIdx);
     this.KEYS[keyIdx] = 0;
   }
 

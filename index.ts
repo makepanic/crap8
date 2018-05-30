@@ -40,7 +40,6 @@ document.body.onkeyup = (ev: KeyboardEvent) => {
 Array.from(document.querySelectorAll('button[data-c]'))
   .forEach((button: HTMLButtonElement) => {
     const key = parseInt(button.dataset['c'], 16);
-    console.log('bound', key);
     button.onmousedown = () => chip8.keyDown(key);
     button.onmouseup = () => chip8.keyUp(key);
   });
