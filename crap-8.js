@@ -127,11 +127,6 @@ define("src/utils/debug", ["require", "exports"], function (require, exports) {
 define("src/Chip8", ["require", "exports", "src/Display", "src/Audio", "src/Font", "src/Opcode", "src/utils/timeout", "src/utils/debug"], function (require, exports, Display_1, Audio_1, Font_1, Opcode_1, timeout_1, debug_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    /*
-    https://github.com/JamesGriffin/CHIP-8-Emulator/blob/master/src/chip8.cpp
-    https://en.wikipedia.org/wiki/CHIP-8#Opcode_table
-    via http://devernay.free.fr/hacks/chip8/C8TECH10.HTM
-     */
     class Chip8 {
         constructor(canvas) {
             this.audio = new Audio_1.default();
@@ -139,7 +134,7 @@ define("src/Chip8", ["require", "exports", "src/Display", "src/Audio", "src/Font
             this.timersRunning = false;
             this.didDraw = false;
             this.didDumpMemory = false;
-            this.tickrate = 0;
+            this.tickrate = 1000 / 1000;
             this.timerTickrate = 1000 / 60;
             // Registers
             this.V = new Array(16).fill(0);
@@ -189,10 +184,14 @@ define("src/Chip8", ["require", "exports", "src/Display", "src/Audio", "src/Font
         }
         async run() {
             this.running = true;
+            let lastRun = Date.now();
             while (this.running) {
-                for (let i = 0; i < 10; i++) {
+                // try to calculate amount of cycles we need for 500hz
+                const cyclesToRun = ((Date.now() - lastRun) / 1000) * 500;
+                for (let i = 0; i < cyclesToRun; i++) {
                     await this.step();
                 }
+                lastRun = Date.now();
                 await timeout_1.default(this.tickrate);
             }
         }
@@ -289,6 +288,12 @@ define("src/Chip8", ["require", "exports", "src/Display", "src/Audio", "src/Font
                         case 0x0006: {
                             this.V[0xF] = this.V[op.x] & 0x1;
                             this.V[op.x] >>= 1;
+                            this.V[op.x] &= 0xFF;
+                            break;
+                        }
+                        case 0x0007: {
+                            this.V[0xF] = +(this.V[op.y] > this.V[op.x]);
+                            this.V[op.x] = this.V[op.y] - this.V[op.x];
                             this.V[op.x] &= 0xFF;
                             break;
                         }
@@ -428,7 +433,6 @@ define("src/Chip8", ["require", "exports", "src/Display", "src/Audio", "src/Font
             });
         }
         keyDown(keyIdx) {
-            console.log('down', keyIdx);
             this.KEYS[keyIdx] = 1;
             if (this.resolveWaitingForKey) {
                 this.resolveWaitingForKey(keyIdx);
@@ -436,7 +440,6 @@ define("src/Chip8", ["require", "exports", "src/Display", "src/Audio", "src/Font
             }
         }
         keyUp(keyIdx) {
-            console.log('up', keyIdx);
             this.KEYS[keyIdx] = 0;
         }
         dump() {
@@ -498,7 +501,6 @@ define("index", ["require", "exports", "src/Chip8"], function (require, exports,
     Array.from(document.querySelectorAll('button[data-c]'))
         .forEach((button) => {
         const key = parseInt(button.dataset['c'], 16);
-        console.log('bound', key);
         button.onmousedown = () => chip8.keyDown(key);
         button.onmouseup = () => chip8.keyUp(key);
     });
